@@ -1,0 +1,180 @@
+import 'package:flutter/material.dart';
+import 'package:charts_flutter/flutter.dart' as charts;
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+
+class HomePage extends StatefulWidget {
+  final Widget child;
+
+  HomePage({Key key ,this.child}) : super(key:key);
+
+  _HomePageState createState() =>  _HomePageState();
+}
+
+class _HomePageState extends State<HomePage>{
+  List<charts.Series<Pollution,String>> _seriesData;
+  List<charts.Series<Task,String>> _seriesPieData;
+  _generateData(){
+    var deta1 =[
+      new Pollution(1970, 'USA', 10),
+      new Pollution(1970, 'Asia', 30),
+      new Pollution(1970, 'Europe', 40),
+    ];
+    var deta2 =[
+      new Pollution(1970, 'USA', 150),
+      new Pollution(1970, 'Asia', 100),
+      new Pollution(1970, 'Europe', 80),
+    ];
+    var deta3 =[
+      new Pollution(1970, 'USA', 300),
+      new Pollution(1970, 'Asia', 180),
+      new Pollution(1970, 'Europe', 200),
+    ];
+    _seriesData.add(
+      charts.Series(
+        domainFn: (Pollution pollution,_)=>pollution.place,
+        measureFn: (Pollution pollution,_)=>pollution.quantity,
+        id: '2017',
+        data: deta1,
+        fillPatternFn: (_,__)=> charts.FillPatternType.solid,
+        fillColorFn:(Pollution pollution,_)=>
+            charts.ColorUtil.fromDartColor(Color(0xff990099)),
+      ),
+    );
+
+    var pieData=[
+      new Task('Work',35.8,Color(0xff3366cc)),
+      new Task('Eat',8.3,Color(0xff990099)),
+      new Task('Commute',10.8,Color(0xff109618)),
+      new Task('TV',15.6,Color(0xffdbe19)),
+      new Task('Sleep',19.2,Color(0xffff9900)),
+      new Task('Other',10.3,Color(0xffdc3912)),
+    ];
+    _seriesPiData.add(
+      charts.Series(
+        data:pieData,
+        domainFn:(Task task,_)=> task.task,
+          measureFn:(Task task,_)=> task.taskvalue,
+        colorFn: (Task task,_)=>
+        charts.ColorUtil.fromDartColor(task.colorval),
+        id:'Daily Task',
+        labelAccessorFn:(Task row,_)=>'${row.taskvalue}',
+      ),
+    );
+  }
+  @override
+  void initState(){
+    super.initState();
+  }
+  @override
+  Widget build(BuildContext context){
+    return MaterialApp(
+      home:DefaultTabController(
+        length: 3,
+        child: Scaffold(
+          appBar: AppBar(
+            backgroundColor: Color(0xff1976d2),
+            bottom: TabBar(
+              indicatorColor: Color(0xff9962D0),
+              tabs: [
+              Tab(
+                icon: Icon(FontAwesomeIcons.solidChartBar),
+              ),
+                Tab(icon: Icon(FontAwesomeIcons.chartPie)),
+                Tab(icon: Icon(FontAwesomeIcons.chartLine)),
+
+              ],
+            ),
+            title: Text('Flutter Charts'),
+          ),
+          body: TabBarView(
+            children: [
+            Padding(
+            padding: EdgeInsets.all(8.0),
+    child:Container(
+    child:Center(
+    child: Column(
+    children: <Widget>[
+      Text(
+    'so2 emission,by world region (in million tonner)',style: TextStyle(fontSize:24.0,fontWeight:FontWeight.bold),
+    ),
+              Expanded(
+    child: charts.BarChart(
+    _seriesData
+    animate: true,
+    barGroupingType: charts.BarGroupingType.grouped,
+    animationDuration: Duration(seconds:5),
+    ),
+    ),
+              Padding(
+                padding: EdgeInsets.all(8.0),
+                child:Container(
+                  child:Center(
+                    child: Column(
+                      children: <Widget>[
+                        Text(
+                          'Time spent on daily tasks',style: TextStyle(fontSize:24.0,fontWeight:FontWeight.bold ),
+                        ),
+                        SizedBox(height: 10.0,),
+                        Expanded(
+                          child: charts.PieChart(
+                            _seriesPieData,
+                            animate:true,
+                            animationDuration: Duration(seconds:5),
+                            behaviors:[
+                              new charts.DatumLegend(
+                                outsideJustification: charts.OutsideJustification.endDrawArea,
+                                horizontalFirst: false,
+                                desiredMaxRows:2,
+                                cellPadding:new EdgeInsets.only(right:4.0, bottom:4.0),
+                                entryTextStyle: charts.TextStyleSpec(
+                                  color:charts.MaterialPalette.purple.shadeDefault,
+                                  fontFamily:'Georgia',
+                                  fontSize:11
+                                ),
+                              )
+                            ],
+                            defaultRenderer:new charts.ArcRendererConfig(
+                              arcWidth:100,
+                              arcRendererDecorators:[
+                                new charts.ArcLabelDecorator(
+                                  labelPosition:charts.ArcLabelPosition.inside
+                                )
+                              ]
+                            )
+                          )
+                        )
+
+                      ],
+                    ),
+
+                  )
+                )
+              )
+            ],
+        ),
+        ),
+      ),
+            )
+      )
+    )
+    )
+            );
+
+  }
+
+}
+
+class Task{
+  String task;
+  double taskvalue;
+  Color colorval;
+
+   Task(this.task,this.taskvalue,thisColorval);
+  }
+class Pollution{
+  String place;
+  int year;
+  int quantity;
+
+  Pollution(this.year,this.place,this.quantity);
+}
